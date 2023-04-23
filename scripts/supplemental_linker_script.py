@@ -1,35 +1,54 @@
-Import("env")
 import os
+Import("env")
 
 # BOOTLOADER CONFIGS
-board_config = env.BoardConfig()
+board = env.BoardConfig()
+
+# LINKER STUFF
+BUILD_DIR = env.get('BUILD_DIR')
+TARGET = env.get('PROGNAME')
 
 # manage boot type
 BOOT_TYPE = env.GetProjectOption("boot_type")
-LD_PATH = os.path.join(env.get('PROJECT_DIR'), 'lib/libDaisy/core/STM32H750IB_%s.lds' % BOOT_TYPE)
-
-if BOOT_TYPE == 'none':
-    board_config.update("build.ldscript", LD_PATH)
-    board_config.update("upload.offset_address", '0x08000000')
-
-elif BOOT_TYPE == 'sram':
-    board_config.update("build.ldscript", LD_PATH)
-    board_config.update("upload.offset_address", '0x90040000')
-    env.Append(CFLAGS=['-DBOOT_APP'])
-
-elif BOOT_TYPE == 'qspi':
-    board_config.update("build.ldscript", LD_PATH)
-    board_config.update("upload.maximum_size", "67108864")
-    board_config.update("upload.offset_address", '0x90040000')
-    env.Append(CFLAGS=['-DBOOT_APP'])
+if BOOT_TYPE == 'flash':
+    board.update("upload.offset_address", '0x08000000')
+elif BOOT_TYPE in {'sram', 'qspi'}:
+    board.update("upload.offset_address", '0x90040000')
+    env.Append(CCFLAGS=['-DBOOT_APP'])
 
 # link flags
 # otherwise there are errors. Do Not Remove !!!!!!!
 print("running supplimental linker script . . .")
 env.Append(
-  LINKFLAGS=[
+    LINKFLAGS=[
         "-static",
         "-mfloat-abi=hard",
-        "-mfpu=fpv4-sp-d16"
-  ]
+        "-mfpu=fpv4-sp-d16",
+
+        '-Wl,-Map=%(build_dir)s/%(target)s.map,--cref' % {
+            'build_dir': BUILD_DIR, 'target': TARGET},
+        '-Wl,--gc-sections',
+        '-Wl,--print-memory-usage',
+        '-Wl,-Tlib/libDaisy/core/STM32H750IB_%s.lds' % BOOT_TYPE
+    ]
+)
+env.Append(
+    CFLAGS=[
+        '-std=gnu11',
+
+    ]
+)
+env.Append(
+    CXXFLAGS=[
+        "-fno-exceptions",
+        "-fasm",
+        "-finline",
+        "-finline-functions-called-once",
+        "-fshort-enums",
+        "-fno-move-loop-invariants",
+        "-fno-unwind-tables",
+        "-fno-rtti",
+        "-Wno-register",
+        "-std=gnu++14"
+    ]
 )
