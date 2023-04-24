@@ -1,4 +1,4 @@
-import os
+from os.path import join, isfile
 Import("env")
 
 # BOOTLOADER CONFIGS
@@ -62,3 +62,39 @@ env.Append(
         "-std=gnu++14"
     ]
 )
+
+# patches
+FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-stm32cubeh7")
+patchflag_path = join(FRAMEWORK_DIR, ".patching-done")
+
+USBD_CLASS = join(FRAMEWORK_DIR, "Middlewares", "ST", "STM32_USB_Device_Library")
+
+patches = [
+    {
+    "original": join(USBD_CLASS, "Class", "CDC", "Inc", "usbd_cdc.h"),
+    "patch": join("patches", "usbd_cdc.h.patch")
+    },
+    {
+    "original": join(USBD_CLASS, "Core", "Inc", "usbd_core.h"),
+    "patch": join("patches", "usbd_core.h.patch")
+    }
+]
+
+if not isfile(join(FRAMEWORK_DIR, ".patching-done")):
+    print("patching USB library . . .")
+    for patch in patches:
+        original_file = patch["original"]
+        patched_file = patch["patch"]
+
+        assert isfile(original_file) and isfile(patched_file)
+
+        env.Execute("patch %s %s" % (original_file, patched_file))
+
+        # env.Execute("touch " + patchflag_path)
+
+
+    def _touch(path):
+        with open(path, "w") as fp:
+            fp.write("")
+
+    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
