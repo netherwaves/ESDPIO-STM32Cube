@@ -22,7 +22,7 @@ once this is done, you can compile the whole program like you would in PlatformI
 
 ## bootloader
 
-upon first compilation, you will have access to a custom build task that lets you upload the Daisy bootloader on the device directly from the library folder. it will be available in the Browser sidebar by clicking on the PlatformIO icon, navigating to the Project Tasks tab down in the `electrosmith_daisy` environment, in the Custom folder. the task is named "Upload bootloader".
+upon first compilation, you will have access to a custom build task that lets you upload the [Daisy bootloader](https://electro-smith.github.io/libDaisy/md_doc_md__a7__getting__started__daisy__bootloader.html) on the device directly from the library folder. it will be available in the Browser sidebar by clicking on the PlatformIO icon, navigating to the Project Tasks tab down in the `electrosmith_daisy` environment, in the Custom folder. the task is named "Upload bootloader".
 
 additionally, you can change the boot type (like you would in the regular Daisy toolchain) by editing the platformio.ini file, at line 41:
 
