@@ -15,7 +15,7 @@ to install them, simply run the following commands:
 
 ```
 git submodule init
-git submodule update --recurse-submodules --sync
+git submodule update --remote
 ```
 
 once this is done, you can compile the whole program like you would in PlatformIO by pressing the checkmark in the toolbar.
